@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101213">
+  <title>Dochtwacht · Der Nachtforst</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='8' fill='%23141717'/%3E%3Cpath fill='%23e5ad59' d='M26 3c5 13-4 13 0 19 5-1 7-6 7-9 11 17-1 21-8 22-12 0-17-12-9-20-1 7 3 8 4 8-1-8 7-13 6-20Z'/%3E%3Cpath stroke='%23e5ad59' stroke-width='3' d='M13 39h23'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="icons.js"></script>
+  <script defer src="engine.js"></script>
+  <script defer src="combat.js"></script>
+  <script defer src="sound.js"></script>
+  <script defer src="game.js"></script>
+</head>
+<body>
+<main class="game-shell">
+  <header class="topbar">
+    <div class="brand">
+      <svg class="crest" viewBox="0 0 62 70" aria-hidden="true">
+        <path d="M31 1 59 17v32L31 67 3 49V17Z" fill="none" stroke="currentColor" opacity=".45"/>
+        <path d="m31 5 24 14v28L31 63 7 47V19Z" fill="none" stroke="currentColor" opacity=".8"/>
+        <path d="m12 32 4-2m30 0 4 2M16 22l4 2m21 0 4-2M25 16l2 4m11-4-2 4" fill="none" stroke="currentColor"/>
+        <path d="M32 10c4 10-3 11-1 17 3 0 5-4 5-7 7 9 4 16-5 17-9 0-12-7-7-14 0 5 3 6 4 6-2-7 4-10 4-19Z" fill="currentColor"/>
+        <path d="M25 39q6 3 12 0l-1 12H26Zm-5 14h22l-11 6Z" fill="currentColor"/>
+        <path d="M28 40v5m5-4v7" stroke="#784c23" stroke-width="1.5"/>
+      </svg>
+      <div><h1>Dochtwacht</h1><div class="brand-sub"><i></i>Tower Defense<i></i></div></div>
+    </div>
+    <div class="vitals" aria-label="Spielstand">
+      <div class="stat essence-stat"><span class="stat-icon" data-icon="crystal"></span><div><span class="micro">Essenz</span><strong id="essence">180</strong></div></div>
+      <button class="stat shrine-stat" id="top-shrine" title="Schrein ausbauen"><span class="stat-icon" data-icon="shield"></span><span><span class="micro">Schrein</span><strong><span id="hp">100</span><small> / <span id="maxhp">100</span></small></strong></span></button>
+      <div class="stat wave-stat"><span class="stat-icon" data-icon="swords"></span><div><span class="micro">Welle</span><strong id="wave">01</strong></div></div>
+    </div>
+    <div class="utilities">
+      <button class="square" id="sound" title="Ton ausschalten" aria-label="Ton ausschalten" aria-pressed="true"><span data-icon="sound"></span></button>
+      <button class="square" id="manual" title="Spielanleitung (H)" aria-label="Spielanleitung"><span data-icon="book"></span></button>
+    </div>
+  </header>
+  <section class="arena" id="arena" aria-label="Spielkarte Der Nachtforst">
+    <div class="world" id="world">
+      <img class="terrain" src="assets/nachtforst.png" alt="" draggable="false">
+      <div id="range" hidden></div>
+      <div id="sites"></div>
+      <button class="shrine-object" id="shrine" aria-label="Schrein auswählen und ausbauen">
+        <span class="shrine-aureole"></span>
+        <img src="assets/shrine.png" alt="" draggable="false">
+        <span class="shrine-plate"><span data-icon="shield"></span> Schrein</span>
+        <span class="life-track"><i id="shrine-health"></i></span>
+      </button>
+      <canvas id="battle" aria-hidden="true"></canvas>
+    </div>
+    <div class="shade"></div>
+    <div class="map-heading"><div class="overline"><i></i>Endlosmodus</div><h2>Der Nachtforst</h2></div>
+    <div class="phase" id="phase"><i></i><span>Bauphase</span></div>
+    <div class="map-controls"><button class="map-btn" id="pause" aria-label="Spiel pausieren" title="Pause (Leertaste)" disabled><span data-icon="pause"></span></button><button class="map-btn speed" id="speed" title="Spielgeschwindigkeit wechseln">1×</button><span class="ctrl-divider"></span><button class="map-btn" id="full" title="Vollbild" aria-label="Vollbild"><span data-icon="expand"></span></button></div>
+    <div class="map-coord"><span data-icon="compass"></span><span id="free-pads">7 freie Bauplätze</span></div>
+    <div class="framecorner tl"></div><div class="framecorner tr"></div><div class="framecorner bl"></div><div class="framecorner br"></div>
+    <div id="detail" class="detail" hidden></div>
+    <div id="notice" class="notice" role="status"></div>
+    <div id="pause-flag" class="pause-flag" hidden>Spiel pausiert</div>
+  </section>
+  <section class="command" aria-label="Baumenü und Wellensteuerung">
+    <div class="arsenal">
+      <div class="section-line"><h2><span data-icon="turret"></span>Kerzenarsenal</h2><span class="rule"></span><span class="tiny-note">Turm auswählen</span></div>
+      <div id="cards" class="cards"></div>
+    </div>
+    <div class="wave-command">
+      <div class="section-line"><h2><span data-icon="waves"></span><span id="wave-label">Nächste Welle</span></h2><span class="rule"></span></div>
+      <div class="wave-box"><div class="wave-meta"><span id="wave-no">Welle 01</span><span id="wave-count"><span data-icon="skull"></span>6 Gegner</span></div>
+      <button class="start" id="start"><span data-icon="play"></span><span id="start-text">Welle starten</span></button></div>
+    </div>
+  </section>
+  <footer class="footnote"><span><span data-icon="mouse"></span><span id="hint">Wähle einen Turm und klicke auf einen freien Bauplatz.</span></span><span class="keys-help"><kbd>1–4</kbd>Turmauswahl<i></i><kbd>Leertaste</kbd>Start / Pause</span></footer>
+</main>
+<dialog id="dialog" aria-labelledby="dialog-title"><div id="dialog-body"></div></dialog>
+</body>
+</html>
